@@ -14,13 +14,13 @@ export default function Login() {
   const handleSubmit = (e) => {
     e.preventDefault();
     // TODO: Implement login logic here
-    // On success, navigate to home page
-    navigate("/");
+    // On success, navigate to user home page
+    navigate("/home");
   };
 
   return (
     <div style={{ textAlign: "center", marginTop: "2rem" }}>
-      <h2>Login Page</h2>
+      <h2>Sign In Page</h2>
       {/* TODO: Add a password field to the form */}
       <h3 style={{ color: "gray", fontWeight: "normal" }}>
         {/* Add password input here */}
