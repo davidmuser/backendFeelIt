@@ -8,6 +8,18 @@ export default function Register() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // TODO: Implement registration logic here
+    // On success, navigate to user home page
+    navigate("/home");
+  };
+
+  return (
+    <div style={{ textAlign: "center", marginTop: "2rem" }}>
+      <h2>Sign Up Page</h2>
+      {/* TODO: Implement register form */}
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: "inline-block", textAlign: "left" }}
     navigate("/");
   };
 

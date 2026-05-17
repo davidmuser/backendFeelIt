@@ -182,3 +182,26 @@
     border-right-color: var(--border);
   }
 }
+
+.home-background {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background-color: #4C7EE1;
+}
+
+.home-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 55%;
+  background-color: #ffffff;
+  clip-path: ellipse(140% 70% at 50% 100%);
+}
+
+.home-background > * {
+  position: relative;
+  z-index: 1;
+}
