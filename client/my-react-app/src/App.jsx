@@ -6,19 +6,11 @@ import "./App.css";
 import SupportChat from "./components/SupportChat";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import UserHome from "./pages/UserHome";
+import SplashScreen from "./components/SplashScreen";
 
 // Home/Landing page component
 function Home() {
-  // This is the landing page. Students should see the Login and Register buttons here.
-  return (
-    <div className="home-background" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-      <h1>Welcome to Feel it</h1>
-      <div style={{ marginTop: '2rem' }}>
-        <MyButton />
-      </div>
-    </div>
-  );
+  return <SplashScreen />;
 }
 
 export default function App() {
@@ -32,8 +24,8 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         {/* Register page route */}
         <Route path="/register" element={<Register />} />
-        {/* Signed-in homepage route */}
-        <Route path="/home" element={<UserHome />} />
+        {/* Support chat route */}
+        <Route path="/support" element={<SupportChat />} />
       </Routes>
     </Router>
   );
