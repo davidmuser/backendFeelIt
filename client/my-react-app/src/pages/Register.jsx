@@ -3,6 +3,7 @@
 // On successful registration, navigate to the home page.
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { setCurrentEmail } from "../utils/moodStorage";
 
 export default function Register() {
   // State for form fields
@@ -13,8 +14,7 @@ export default function Register() {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    // TODO: Implement registration logic here
-    // On success, navigate to user home page
+    setCurrentEmail(email);
     navigate("/home");
   };
 

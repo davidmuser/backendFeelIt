@@ -3,6 +3,7 @@
 // On successful login, navigate to the home page.
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { setCurrentEmail } from "../utils/moodStorage";
 
 export default function Login() {
   // State for form fields
@@ -13,8 +14,7 @@ export default function Login() {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    // TODO: Implement login logic here
-    // On success, navigate to user home page
+    setCurrentEmail(email);
     navigate("/home");
   };
 

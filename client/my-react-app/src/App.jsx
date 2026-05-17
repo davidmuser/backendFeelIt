@@ -7,6 +7,7 @@ import MyButton from "./components/MyButton";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import UserHome from "./pages/UserHome";
+import RealHome from "./pages/RealHome";
 
 // Home/Landing page component
 function Home() {
@@ -34,6 +35,8 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         {/* Signed-in homepage route */}
         <Route path="/home" element={<UserHome />} />
+        {/* Main app dashboard route */}
+        <Route path="/dashboard" element={<RealHome />} />
       </Routes>
     </Router>
   );
