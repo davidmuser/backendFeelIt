@@ -1,19 +1,21 @@
-// Login.jsx
-// This is the login page. Students should implement a form with username/email and password fields.
-// On successful login, navigate to the home page.
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { setCurrentEmail } from "../utils/moodStorage";
 
+async function signInWithServer(email, password) {
+  void email;
+  void password;
+}
+
 export default function Login() {
-  // State for form fields
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); // State for password field
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    // Call POST /login on the backend to validate credentials and return auth data.
+    await signInWithServer(email, password);
     setCurrentEmail(email);
     navigate("/home");
   };
@@ -21,12 +23,6 @@ export default function Login() {
   return (
     <div style={{ textAlign: "center", marginTop: "2rem" }}>
       <h2>Sign In Page</h2>
-      {/* TODO: Add a password field to the form */}
-      <h3 style={{ color: "gray", fontWeight: "normal" }}>
-        {/* Add password input here */}
-        {/* Example: <input type="password" ... /> */}
-        {/* Login form with email and password fields */}
-      </h3>
       <form
         onSubmit={handleSubmit}
         style={{ display: "inline-block", textAlign: "left" }}

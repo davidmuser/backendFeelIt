@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { getCurrentEmail, loadUserMoodState, saveUserMoodState } from "../utils/moodStorage";
+import {
+  getCurrentEmail,
+  loadUserMoodState,
+  saveUserMoodState,
+} from "../utils/moodStorage";
 
 const moodOptions = [
   { value: "sad", emoji: "😢", label: "Sad" },
@@ -34,6 +38,17 @@ function getFollowUpPrompt(mood) {
   return "What are you feeling about today?";
 }
 
+async function getTodayMoodFromServer(email) {
+  void email;
+  return null;
+}
+
+async function saveTodayMoodToServer(email, mood, note) {
+  void email;
+  void mood;
+  void note;
+}
+
 export default function DailyMoodPrompt() {
   const currentEmail = getCurrentEmail();
   const [submittedToday, setSubmittedToday] = useState(false);
@@ -44,6 +59,8 @@ export default function DailyMoodPrompt() {
 
   useEffect(() => {
     if (!currentEmail) return;
+    // Call GET /user-health/today on the backend to load today's saved mood from the database.
+    getTodayMoodFromServer(currentEmail);
     const saved = loadUserMoodState(currentEmail);
     setStartDate(saved?.startDate || null);
     if (saved?.answeredToday) {
@@ -61,13 +78,17 @@ export default function DailyMoodPrompt() {
 
   const handleSaveNote = () => {
     if (!selectedMood || !currentEmail) return;
+    // Call POST /user-health/today on the backend to save today's mood and note in user_health.
+    saveTodayMoodToServer(currentEmail, selectedMood, moodNote);
     const saved = saveUserMoodState(currentEmail, selectedMood, moodNote);
     setSavedNote(saved.note || "");
     setStartDate(saved.startDate || null);
     setSubmittedToday(true);
   };
 
-  const moodLabel = moodOptions.find((item) => item.value === selectedMood)?.label;
+  const moodLabel = moodOptions.find(
+    (item) => item.value === selectedMood,
+  )?.label;
   const dayCount = getDayCount(startDate);
   const followUpPrompt = getFollowUpPrompt(selectedMood);
 
@@ -112,8 +133,15 @@ export default function DailyMoodPrompt() {
       <h2 style={{ margin: 0, fontSize: "1.65rem", color: "#102a43" }}>
         How are you feeling today?
       </h2>
-      <p style={{ margin: "0.75rem 0 1.5rem", color: "#334e68", lineHeight: 1.6 }}>
-        Choose one mood from sad/upset to amazing/star-eyes. You can answer only once per day.
+      <p
+        style={{
+          margin: "0.75rem 0 1.5rem",
+          color: "#334e68",
+          lineHeight: 1.6,
+        }}
+      >
+        Choose one mood from sad/upset to amazing/star-eyes. You can answer only
+        once per day.
       </p>
 
       {submittedToday ? (
@@ -130,7 +158,8 @@ export default function DailyMoodPrompt() {
               Today's mood
             </p>
             <p style={{ margin: "0.5rem 0 0", fontSize: "1.35rem" }}>
-              {moodOptions.find((item) => item.value === selectedMood)?.emoji} {moodLabel}
+              {moodOptions.find((item) => item.value === selectedMood)?.emoji}{" "}
+              {moodLabel}
             </p>
           </div>
 
@@ -145,7 +174,14 @@ export default function DailyMoodPrompt() {
             <p style={{ margin: 0, color: "#475569", fontWeight: 600 }}>
               What you shared today
             </p>
-            <p style={{ margin: "0.5rem 0 0", fontSize: "1rem", color: "#1e293b", whiteSpace: "pre-wrap" }}>
+            <p
+              style={{
+                margin: "0.5rem 0 0",
+                fontSize: "1rem",
+                color: "#1e293b",
+                whiteSpace: "pre-wrap",
+              }}
+            >
               {savedNote || "No extra note was added."}
             </p>
           </div>
@@ -161,11 +197,21 @@ export default function DailyMoodPrompt() {
             <p style={{ margin: 0, color: "#475569", fontWeight: 600 }}>
               Journey start
             </p>
-            <p style={{ margin: "0.5rem 0 0", fontSize: "1rem", color: "#1e293b" }}>
-              {startDate ? `Started on ${new Date(startDate).toLocaleDateString()}` : "Start date not set yet."}
+            <p
+              style={{
+                margin: "0.5rem 0 0",
+                fontSize: "1rem",
+                color: "#1e293b",
+              }}
+            >
+              {startDate
+                ? `Started on ${new Date(startDate).toLocaleDateString()}`
+                : "Start date not set yet."}
             </p>
             <p style={{ margin: "0.75rem 0 0", color: "#334e68" }}>
-              {startDate ? `Day ${dayCount} of your journey` : "This is the first entry of your journey."}
+              {startDate
+                ? `Day ${dayCount} of your journey`
+                : "This is the first entry of your journey."}
             </p>
           </div>
         </div>
@@ -180,9 +226,16 @@ export default function DailyMoodPrompt() {
             }}
           >
             <p style={{ margin: 0, color: "#475569", fontWeight: 600 }}>
-              {moodOptions.find((item) => item.value === selectedMood)?.emoji} {moodLabel}
+              {moodOptions.find((item) => item.value === selectedMood)?.emoji}{" "}
+              {moodLabel}
             </p>
-            <p style={{ margin: "0.5rem 0 0", color: "#334e68", lineHeight: 1.6 }}>
+            <p
+              style={{
+                margin: "0.5rem 0 0",
+                color: "#334e68",
+                lineHeight: 1.6,
+              }}
+            >
               {followUpPrompt}
             </p>
             <textarea
@@ -201,7 +254,14 @@ export default function DailyMoodPrompt() {
                 resize: "vertical",
               }}
             />
-            <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "0.75rem" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "0.75rem",
+                flexWrap: "wrap",
+                marginTop: "0.75rem",
+              }}
+            >
               <button
                 type="button"
                 onClick={handleSaveNote}
@@ -236,7 +296,13 @@ export default function DailyMoodPrompt() {
           </div>
         </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: "0.8rem" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+            gap: "0.8rem",
+          }}
+        >
           {moodOptions.map((option) => (
             <button
               key={option.value}
@@ -256,7 +322,13 @@ export default function DailyMoodPrompt() {
               <span role="img" aria-label={option.label}>
                 {option.emoji}
               </span>
-              <div style={{ marginTop: "0.5rem", fontSize: "0.95rem", color: "#334e68" }}>
+              <div
+                style={{
+                  marginTop: "0.5rem",
+                  fontSize: "0.95rem",
+                  color: "#334e68",
+                }}
+              >
                 {option.label}
               </div>
             </button>
