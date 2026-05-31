@@ -80,10 +80,69 @@ app.post("/user-health/today", async (req, res) => {
 });
 
 // Implement creating a new user document in the users collection.
-async function registerUser() {}
+async function registerUser(userData = {}, collection = usersCollection) {
+  if (!collection) {
+    throw new Error("Users collection is not available.");
+  }
+
+  const email =
+    typeof userData.email === "string" ? userData.email.trim().toLowerCase() : "";
+  const password =
+    typeof userData.password === "string" ? userData.password : "";
+  const name =
+    typeof userData.name === "string" ? userData.name.trim() : "";
+
+  if (!email) {
+    throw new Error("Email is required.");
+  }
+
+  if (!password) {
+    throw new Error("Password is required.");
+  }
+
+  const existingUser = await collection.findOne(
+    { email },
+    { projection: { _id: 1 } },
+  );
+
+  if (existingUser) {
+    const error = new Error("A user with this email already exists.");
+    error.statusCode = 409;
+    throw error;
+  }
+
+  const now = new Date();
+  const newUser = {
+    email,
+    password,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  if (name) {
+    newUser.name = name;
+  }
+
+  try {
+    const result = await collection.insertOne(newUser);
+    return {
+      ...newUser,
+      _id: result.insertedId,
+    };
+  } catch (error) {
+    if (error?.code === 11000) {
+      const duplicateError = new Error("A user with this email already exists.");
+      duplicateError.statusCode = 409;
+      throw duplicateError;
+    }
+
+    throw error;
+  }
+}
 
 // Implement authenticating a user from the users collection on sign in.
 async function signInUser() {}
+  
 
 // Implement reading today's mood entry for the signed-in user from user_health.
 async function getTodayUserMood() {}
