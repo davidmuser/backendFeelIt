@@ -60,8 +60,32 @@ app.get("/health", (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
-  await registerUser(req.body, usersCollection);
-  res.status(501).json({ message: "registerUser not implemented yet" });
+  try {
+    const result = await registerUser(req.body, usersCollection);
+    return res.status(201).json(result);
+  } catch (error) {
+    if (
+      error?.message === "EMAIL_REQUIRED" ||
+      error?.message === "PASSWORD_REQUIRED"
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required." });
+    }
+
+    if (error?.message === "USER_ALREADY_EXISTS") {
+      return res
+        .status(409)
+        .json({ message: "A user with that email already exists." });
+    }
+
+    if (error?.message === "DB_NOT_READY") {
+      return res.status(503).json({ message: "Database is not connected." });
+    }
+
+    console.error("Register failed:", error);
+    return res.status(500).json({ message: "Unable to register user." });
+  }
 });
 
 app.post("/login", async (req, res) => {
@@ -80,7 +104,46 @@ app.post("/user-health/today", async (req, res) => {
 });
 
 // Implement creating a new user document in the users collection.
-async function registerUser() {}
+async function registerUser(payload, collection) {
+  if (!collection) {
+    throw new Error("DB_NOT_READY");
+  }
+
+  const email = payload?.email?.trim().toLowerCase();
+  const password = payload?.password;
+
+  if (!email) {
+    throw new Error("EMAIL_REQUIRED");
+  }
+
+  if (!password) {
+    throw new Error("PASSWORD_REQUIRED");
+  }
+
+  const existingUser = await collection.findOne({ email });
+  if (existingUser) {
+    throw new Error("USER_ALREADY_EXISTS");
+  }
+
+  const createdAt = new Date();
+  const userDocument = {
+    email,
+    password,
+    createdAt,
+    updatedAt: createdAt,
+  };
+
+  const insertResult = await collection.insertOne(userDocument);
+
+  return {
+    message: "User registered successfully.",
+    user: {
+      id: insertResult.insertedId,
+      email,
+      createdAt,
+    },
+  };
+}
 
 // Implement authenticating a user from the users collection on sign in.
 async function signInUser() {}

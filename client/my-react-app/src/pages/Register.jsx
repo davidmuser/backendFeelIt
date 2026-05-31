@@ -3,8 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { setCurrentEmail } from "../utils/moodStorage";
 
 async function registerWithServer(email, password) {
-  void email;
-  void password;
+  const response = await fetch("http://localhost:3000/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    throw new Error(errorBody.message || "Registration failed.");
+  }
+
+  return response.json();
 }
 
 export default function Register() {
