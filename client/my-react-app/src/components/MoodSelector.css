@@ -1,0 +1,33 @@
+.mood-selector {
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.mood-list {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.mood-button {
+  background: none;
+  border: 2px solid transparent;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.mood-button:hover {
+  transform: scale(1.2);
+}
+
+.mood-button.selected {
+  border-color: #007BFF;
+  border-radius: 50%;
+}
+
+.selected-mood {
+  margin-top: 20px;
+  font-size: 1.2rem;
+}
