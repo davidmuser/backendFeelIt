@@ -1,5 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
+import bcrypt from "bcrypt";
+import validator from "validator";
 import {
   connectToDatabase,
   getDb,
@@ -60,13 +62,37 @@ app.get("/health", (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
-  await registerUser(req.body, usersCollection);
-  res.status(501).json({ message: "registerUser not implemented yet" });
+  try {
+    const result = await registerUser(req.body, usersCollection);
+    const { statusCode, success, message, user } = result;
+
+    return res.status(statusCode).json({
+      success,
+      message,
+      ...(user && { user }),
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "An unexpected error occurred on the server.",
+    });
+  }
 });
 
 app.post("/login", async (req, res) => {
-  await signInUser(req.body, usersCollection);
-  res.status(501).json({ message: "signInUser not implemented yet" });
+  try {
+    const user = await signInUser(req.body, usersCollection);
+    return res.status(200).json({
+      success: true,
+      message: "Signed in successfully.",
+      user,
+    });
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: error.message || "Invalid email or password.",
+    });
+  }
 });
 
 app.get("/user-health/today", async (req, res) => {
@@ -79,88 +105,62 @@ app.post("/user-health/today", async (req, res) => {
   res.status(501).json({ message: "saveTodayUserMood not implemented yet" });
 });
 
-const express = require('express');
-const bcrypt = require('bcryptjs'); // Ensure npm install bcryptjs is run
-
-// const app = express();
-// app.use(express.json());// Allows Express to read JSON body requests
-
-// This represents your MongoDB database collection instance
-// let usersCollection;
-
-
-/**
- * 1. NEW REGISTER USER FUNCTION (Meets all new requirements)
- */
 async function registerUser(body, collection) {
   if (!collection) {
     return {
       success: false,
       statusCode: 500,
-      message: "Database collection is not initialized."
+      message: "Database collection is not initialized.",
     };
   }
 
   const { email, password, name } = body;
 
-  // Validate: Presence check
   if (!email || !password) {
     return {
       success: false,
       statusCode: 400,
-      message: "Email and password are required."
+      message: "Email and password are required.",
     };
   }
 
-  // Normalize email (trim spaces and convert to lowercase)
   const normalizedEmail = email.trim().toLowerCase();
-
-  // Validate: Email format check
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(normalizedEmail)) {
+  if (!validator.isEmail(normalizedEmail)) {
     return {
       success: false,
       statusCode: 400,
-      message: "Invalid email format."
+      message: "Invalid email format.",
     };
   }
 
-  // Validate: Password length check (min 8 characters)
   if (password.length < 8) {
     return {
       success: false,
       statusCode: 400,
-      message: "Password must be at least 8 characters long."
+      message: "Password must be at least 8 characters long.",
     };
   }
 
   try {
-    // Check if email already exists
     const existingUser = await collection.findOne({ email: normalizedEmail });
     if (existingUser) {
       return {
         success: false,
         statusCode: 409,
-        message: "User with this email already exists."
+        message: "User with this email already exists.",
       };
     }
 
-    // Hash password before saving
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    // Prepare database document (uses passwordHash)
+    const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = {
       email: normalizedEmail,
       passwordHash: hashedPassword,
       name: name || null,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
-    // Insert into MongoDB
     const result = await collection.insertOne(newUser);
-    
-    // Return custom structured object
+
     return {
       success: true,
       statusCode: 201,
@@ -168,23 +168,18 @@ async function registerUser(body, collection) {
       user: {
         _id: result.insertedId,
         email: newUser.email,
-        name: newUser.name
-      }
+        name: newUser.name,
+      },
     };
-
   } catch (error) {
     return {
       success: false,
       statusCode: 500,
-      message: "An internal server error occurred during registration."
+      message: "An internal server error occurred during registration.",
     };
   }
 }
 
-
-/**
- * 2. YOUR ORIGINAL SIGN IN USER FUNCTION
- */
 async function signInUser(credentials, collection) {
   const { email, password } = credentials;
 
@@ -196,14 +191,15 @@ async function signInUser(credentials, collection) {
     throw new Error("Users collection is not initialized.");
   }
 
-  // Find user by email (using normalized email lookup)
-  const user = await collection.findOne({ email: email.toLowerCase() });
+  const user = await collection.findOne({ email: email.trim().toLowerCase() });
   if (!user) {
     throw new Error("Invalid email or password.");
   }
 
-  // Note: Updated field from user.password to user.passwordHash to align with your new schema
-  const isPasswordValid = await bcrypt.compare(password, user.passwordHash || user.password);
+  const isPasswordValid = await bcrypt.compare(
+    password,
+    user.passwordHash || user.password,
+  );
   if (!isPasswordValid) {
     throw new Error("Invalid email or password.");
   }
@@ -214,70 +210,6 @@ async function signInUser(credentials, collection) {
     name: user.name,
   };
 }
-
-
-/**
- * 3. NEW POST /REGISTER ROUTE (With try/catch and required response codes)
- */
-app.post('/register', async (req, res) => {
-  try {
-    // Pass request body and your DB collection to the helper function
-    const result = await registerUser(req.body, usersCollection);
-
-    // Extract the status code and standard output payload
-    const { statusCode, success, message, user } = result;
-
-    // Send HTTP status code and response payload consistently
-    return res.status(statusCode).json({
-      success,
-      message,
-      ...(user && { user }) // Only adds the user object to the response if it exists
-    });
-
-  } catch (error) {
-    // Top-level catch block for unexpected route exceptions
-    return res.status(500).json({
-      success: false,
-      message: "An unexpected error occurred on the server."
-    });
-  }
-});
-
-
-
-// Implement authenticating a user from the users collection on sign in.
-
-async function signInUser(credentials, collection) {
-  const { email, password } = credentials;
-
-  if (!email || !password) {
-    throw new Error("Email and password are required.");
-  }
-
-  if (!collection) {
-    throw new Error("Users collection is not initialized.");
-  }
-
-  // Find user by email in MongoDB
-  const user = await collection.findOne({ email: email.toLowerCase() });
-  if (!user) {
-    throw new Error("Invalid email or password.");
-  }
-
-  // Compare incoming password with hashed password in database (requires npm install bcrypt)
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
-    throw new Error("Invalid email or password.");
-  }
-
-  return {
-    _id: user._id,
-    email: user.email,
-    name: user.name,
-  };
-}
-
-
 
 // Implement reading today's mood entry for the signed-in user from user_health.
 async function getTodayUserMood() {}
