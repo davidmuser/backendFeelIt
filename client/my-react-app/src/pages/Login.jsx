@@ -1,28 +1,46 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { setCurrentEmail } from "../utils/moodStorage";
-
-async function signInWithServer(email, password) {
-  void email;
-  void password;
-}
+import { saveUser } from "../utils/auth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Call POST /login on the backend to validate credentials and return auth data.
-    await signInWithServer(email, password);
-    setCurrentEmail(email);
-    navigate("/home");
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:3000/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setError(data.message || "Login failed");
+        return;
+      }
+      saveUser(data.user);
+      setCurrentEmail(email);
+      navigate(data.user.isProfessional ? "/pro-dashboard" : "/home");
+    } catch {
+      setError("Could not connect to the server. Is it running?");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div style={{ textAlign: "center", marginTop: "2rem" }}>
       <h2>Sign In Page</h2>
+      {error && (
+        <p style={{ color: "#dc2626", marginBottom: "1rem" }}>{error}</p>
+      )}
       <form
         onSubmit={handleSubmit}
         style={{ display: "inline-block", textAlign: "left" }}
@@ -45,7 +63,9 @@ export default function Login() {
             required
           />
         </div>
-        <button type="submit">Login</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Signing in…" : "Login"}
+        </button>
       </form>
     </div>
   );
