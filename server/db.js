@@ -10,6 +10,14 @@ const COLLECTION_DEFINITIONS = [
         key: { email: 1 },
         options: { unique: true, name: "users_unique_email" },
       },
+      {
+        key: { name: 1 },
+        options: {
+          unique: true,
+          name: "users_unique_name",
+          partialFilterExpression: { name: { $exists: true, $type: "string" } },
+        },
+      },
     ],
   },
   {
@@ -20,6 +28,19 @@ const COLLECTION_DEFINITIONS = [
         key: { userId: 1, createdAt: -1 },
         options: { name: "user_health_user_created" },
       },
+    ],
+  },
+  {
+    name: "conversations",
+    indexes: [
+      { key: { "participants.userId": 1 }, options: { name: "conversations_participant" } },
+      { key: { isGroup: 1 }, options: { name: "conversations_isGroup" } },
+    ],
+  },
+  {
+    name: "conversation_messages",
+    indexes: [
+      { key: { conversationId: 1, createdAt: 1 }, options: { name: "messages_by_conversation" } },
     ],
   },
 ];
@@ -101,6 +122,24 @@ export function getUserHealthCollection() {
     );
   }
   return collections.user_health;
+}
+
+export function getConversationsCollection() {
+  if (!collections.conversations) {
+    throw new Error(
+      "conversations collection is not initialized. Call connectToDatabase first.",
+    );
+  }
+  return collections.conversations;
+}
+
+export function getConversationMessagesCollection() {
+  if (!collections.conversation_messages) {
+    throw new Error(
+      "conversation_messages collection is not initialized. Call connectToDatabase first.",
+    );
+  }
+  return collections.conversation_messages;
 }
 
 export async function closeDatabaseConnection() {
