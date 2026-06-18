@@ -6,6 +6,7 @@ const options = [
   {
     label: "Activity / Games",
     description: "See today’s activity and play uplifting games.",
+    route: "/games",
   },
   { label: "Messages", description: "Read and send messages." },
   { label: "Friends", description: "Manage your friends list." },
