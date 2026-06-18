@@ -8,6 +8,7 @@ import UserHome from "./pages/UserHome";
 import RealHome from "./pages/RealHome";
 import TalkToProfessional from "./pages/TalkToProfessional";
 import ProDashboard from "./pages/ProDashboard";
+import Games from "./pages/Games";
 
 function Home() {
   return (
@@ -39,6 +40,7 @@ export default function App() {
         <Route path="/home" element={<UserHome />} />
         <Route path="/dashboard" element={<RealHome />} />
         <Route path="/talk-to-professional" element={<TalkToProfessional />} />
+        <Route path="/games" element={<Games />} />
         <Route path="/pro-dashboard" element={<ProDashboard />} />
       </Routes>
     </Router>
